@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>進階投球生物力學分析：肩肘應力拆解</title>
+    <title>投球運動生物力學分析儀：跨步模式與動作時序對球速與負荷的影響</title>
     <style>
         :root {
             --primary: #1c1c1e;
             --elbow: #FF9500;
             --shoulder: #5856D6;
+            --velo: #007AFF;
             --safe: #34C759;
             --danger: #FF3B30;
         }
@@ -31,7 +32,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        h1 { text-align: center; font-size: 1.2rem; margin-bottom: 20px; }
+        h1 { text-align: center; font-size: 1.2rem; margin-bottom: 20px; color: var(--primary); }
 
         .section {
             margin-bottom: 15px;
@@ -47,7 +48,8 @@
         }
 
         .slider-box { text-align: center; }
-        input[type="range"] { width: 100%; margin: 15px 0; }
+        input[type="range"] { width: 100%; margin: 15px 0; -webkit-appearance: none; background: #ddd; height: 4px; border-radius: 2px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--primary); border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
         .info-row { display: flex; justify-content: space-between; font-weight: bold; }
 
@@ -58,22 +60,30 @@
         /* 分析結果樣式 */
         #resultArea { display: none; margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
 
-        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stats-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        
+        .stat-row { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+        }
 
-        .stat-card { background: #fff; padding: 12px; border-radius: 16px; border: 1px solid #f0f0f0; text-align: center; }
-        .stat-label { font-size: 0.7rem; color: #8e8e93; font-weight: 600; margin-bottom: 4px; }
-        .stat-value { font-size: 1.5rem; font-weight: 800; }
+        .stat-card { background: #fff; padding: 15px; border-radius: 18px; border: 1px solid #f0f0f0; text-align: center; position: relative; }
+        .full-width { grid-column: span 2; }
 
-        .bar-container { width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-top: 8px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 0%; transition: 0.8s ease; }
+        .stat-label { font-size: 0.7rem; color: #8e8e93; font-weight: 600; margin-bottom: 5px; text-transform: uppercase; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
 
-        .report-box { background: #f1f7ff; padding: 15px; border-radius: 14px; font-size: 0.85rem; line-height: 1.6; }
+        .bar-container { width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+        .report-box { background: #f1f7ff; padding: 18px; border-radius: 16px; font-size: 0.85rem; line-height: 1.6; color: #2c3e50; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>投球生物力學分析 (進階版)</h1>
+    <h1>投球運動生物力學分析系統</h1>
 
     <div class="section">
         <label>投手身高 (cm)</label>
@@ -91,7 +101,7 @@
         <div class="slider-box">
             <div class="info-row">
                 <span id="labelCm">144 cm</span>
-                <span id="labelPct" style="color:var(--shoulder)">80%</span>
+                <span id="labelPct" style="color:var(--velo)">80.0%</span>
             </div>
             <input type="range" id="strideRange" oninput="syncLabels(this.value)">
         </div>
@@ -100,25 +110,33 @@
     <div class="section">
         <label>啟動時機 (Timing)</label>
         <select id="timing">
-            <option value="1.0">同步 (Perfect Timing)</option>
+            <option value="1.0">完美同步 (On Time)</option>
             <option value="1.3">過早開胸 (Early Rotation)</option>
-            <option value="1.1">手臂滯後 (Arm Drag)</option>
+            <option value="1.15">手臂滯後 (Arm Drag)</option>
         </select>
     </div>
 
-    <button class="btn" onclick="analyze()">生成生物力學報告</button>
+    <button class="btn" onclick="analyze()">產生完整生物力學報告</button>
 
     <div id="resultArea">
-        <div class="analysis-grid">
-            <div class="stat-card">
-                <div class="stat-label">肘關節內翻力矩</div>
-                <div id="elbowVal" class="stat-value" style="color:var(--elbow)">1.00x</div>
-                <div class="bar-container"><div id="elbowBar" class="bar-fill" style="background:var(--elbow)"></div></div>
+        <div class="stats-container">
+            <div class="stat-card full-width">
+                <div class="stat-label">球速潛力發揮 (Velocity Potential)</div>
+                <div id="veloVal" class="stat-value" style="color:var(--velo)">0%</div>
+                <div class="bar-container"><div id="veloBar" class="bar-fill" style="background:var(--velo)"></div></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">肩關節拉伸應力</div>
-                <div id="shoulderVal" class="stat-value" style="color:var(--shoulder)">1.00x</div>
-                <div class="bar-container"><div id="shoulderBar" class="bar-fill" style="background:var(--shoulder)"></div></div>
+
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="stat-label">肘關節內翻力矩</div>
+                    <div id="elbowVal" class="stat-value" style="color:var(--elbow)">1.00x</div>
+                    <div class="bar-container"><div id="elbowBar" class="bar-fill" style="background:var(--elbow)"></div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">肩關節拉伸應力</div>
+                    <div id="shoulderVal" class="stat-value" style="color:var(--shoulder)">1.00x</div>
+                    <div class="bar-container"><div id="shoulderBar" class="bar-fill" style="background:var(--shoulder)"></div></div>
+                </div>
             </div>
         </div>
         
@@ -130,7 +148,8 @@
     function updateRange() {
         const h = document.getElementById('height').value;
         const r = document.getElementById('strideRange');
-        r.min = h * 0.5; r.max = h * 1.2;
+        r.min = Math.round(h * 0.5); 
+        r.max = Math.round(h * 1.2);
         syncLabels(r.value);
     }
 
@@ -147,36 +166,45 @@
         const mode = document.getElementById('mode').value;
         const ratio = (s / h) * 100;
 
-        // --- 核心運算邏輯 ---
-        
-        // 1. 肘關節內翻力矩 (高度受 Timing 影響)
+        // 1. 肘關節內翻力矩 (Elbow Varus Torque)
         let elbowTorque = 1.0;
-        if (timing > 1.0) elbowTorque *= timing; // Timing 偏差直接加成到力矩
-        if (mode === 'tall' && ratio > 88) elbowTorque *= 1.1; // 高壓式若步幅過大，槓桿效應增加力矩
+        if (timing > 1.0) elbowTorque *= timing;
+        if (mode === 'tall' && ratio > 85) elbowTorque += (ratio - 85) * 0.03;
+        if (mode === 'drive' && ratio > 95) elbowTorque += (ratio - 95) * 0.02;
 
-        // 2. 肩關節拉伸應力 (高度受步幅/動力鏈影響)
+        // 2. 肩關節拉伸應力 (Shoulder Distraction Force)
         let shoulderStress = 1.0;
-        let ideal = (mode === 'tall') ? 80 : 88;
-        let diff = Math.abs(ratio - ideal);
-        shoulderStress += (diff * 0.02); // 步幅偏差導致末端減速負擔增加
-        if (timing === 1.3) shoulderStress *= 1.15; // 開胸過早導致肩膀代償拉力
+        let idealStride = (mode === 'tall') ? 80 : 88;
+        shoulderStress += Math.abs(ratio - idealStride) * 0.02;
+        if (timing === 1.3) shoulderStress *= 1.2;
+
+        // 3. 球速潛力 (Velocity Potential)
+        let potential = 100;
+        potential -= Math.abs(ratio - idealStride) * 1.5;
+        if (timing === 1.3) potential -= 25; // 開胸過早損失能量最大
+        if (timing === 1.15) potential -= 12;
+        potential = Math.max(potential, 45);
 
         // 更新 UI
         document.getElementById('resultArea').style.display = 'block';
+        
+        document.getElementById('veloVal').innerText = Math.round(potential) + "%";
         document.getElementById('elbowVal').innerText = elbowTorque.toFixed(2) + "x";
         document.getElementById('shoulderVal').innerText = shoulderStress.toFixed(2) + "x";
         
-        document.getElementById('elbowBar').style.width = Math.min((elbowTorque/2)*100, 100) + "%";
-        document.getElementById('shoulderBar').style.width = Math.min((shoulderStress/2)*100, 100) + "%";
+        document.getElementById('veloBar').style.width = potential + "%";
+        
+        const eb = document.getElementById('elbowBar');
+        eb.style.width = Math.min((elbowTorque/2)*100, 100) + "%";
+        eb.style.background = elbowTorque < 1.3 ? "#34C759" : (elbowTorque < 1.6 ? "#FFCC00" : "#FF3B30");
+
+        const sb = document.getElementById('shoulderBar');
+        sb.style.width = Math.min((shoulderStress/2)*100, 100) + "%";
+        sb.style.background = shoulderStress < 1.3 ? "#34C759" : (shoulderStress < 1.6 ? "#FFCC00" : "#FF3B30");
 
         document.getElementById('reportContent').innerHTML = `
-            <strong>力學診斷：</strong><br>
-            • <b>肘關節</b>：${elbowTorque > 1.2 ? '⚠️內翻力矩過高，UCL 受傷風險增加。' : '✅力矩控制良好。'}<br>
-            • <b>肩關節</b>：${shoulderStress > 1.2 ? '⚠️拉伸應力偏大，注意旋轉肌群疲勞。' : '✅應力負荷正常。'}<br>
-            • <b>建議</b>：${timing > 1.1 ? '優先修正開胸時機，這對降低肘部力矩最有效。' : '目前的動作結構穩定，建議維持。'}
-        `;
-    }
-    updateRange();
-</script>
-</body>
-</html>
+            <strong>診斷報告：</strong><br>
+            • <b>球速潛力</b>：${potential > 90 ? '動力傳導極佳' : '存在力量流失'} (${potential.toFixed(0)}%)<br>
+            • <b>力學特徵</b>：${mode === 'tall' ? '高壓式投法應注意重心下降的穩定性' : '下沉式投法需強大的下肢推蹬支撐'}<br>
+            • <b>風險提示</b>：${elbowTorque > 1.4 ? '⚠️ 肘部負荷過重，請檢核開胸時機。' : '✅ 負荷處於安全區間。'}<br>
+            • <b>建議</b>：${ratio < 75 ? '可嘗試增加跨步距離以
