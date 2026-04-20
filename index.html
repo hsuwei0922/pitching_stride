@@ -3,275 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>進階投球步幅與生物力學負荷分析</title>
+    <title>棒球投球生物力學分析儀</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --safe: #27ae60;
-            --warning: #f39c12;
-            --danger: #e74c3c;
+            --primary: #1a1a1a;
+            --accent: #007AFF;
+            --safe: #34C759;
+            --warning: #FFCC00;
+            --danger: #FF3B30;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f0f2f5;
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: #f5f5f7;
             margin: 0;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             justify-content: center;
         }
 
         .card {
-            max-width: 500px;
+            max-width: 450px;
             width: 100%;
             background: white;
             padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
 
         h1 {
             text-align: center;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             color: var(--primary);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .section {
             margin-bottom: 20px;
             padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
+            background: #f9f9fb;
+            border-radius: 16px;
         }
 
         label {
             display: block;
             font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #666;
         }
 
         select, input[type="number"] {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
             font-size: 1rem;
+            box-sizing: border-box;
         }
 
-        /* 滑桿樣式 */
-        .slider-container {
+        .slider-box {
+            text-align: center;
             padding: 10px 0;
         }
+
         input[type="range"] {
             width: 100%;
-            height: 8px;
-            border-radius: 5px;
-            background: #ddd;
-            outline: none;
+            margin: 15px 0;
             -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--accent);
-            cursor: pointer;
+            background: #e0e0e0;
+            height: 6px;
+            border-radius: 3px;
         }
 
-        .value-display {
-            text-align: center;
-            font-size: 1.2rem;
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .stride-info {
+            display: flex;
+            justify-content: space-between;
             font-weight: bold;
             color: var(--accent);
-            margin-top: 5px;
+            font-size: 1.1rem;
         }
 
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
         }
 
-        .btn:hover { background: #1a252f; }
+        .btn:active { transform: scale(0.98); }
 
-        /* 儀表板 */
-        #resultView {
+        #resultArea {
             display: none;
             margin-top: 25px;
-            text-align: center;
-            border-top: 2px solid #eee;
             padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
         }
 
         .multiplier {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 800;
-            margin: 10px 0;
+            margin: 5px 0;
+            letter-spacing: -2px;
         }
 
-        .gauge-bar {
+        .gauge-bg {
             width: 100%;
-            height: 12px;
+            height: 10px;
             background: #eee;
-            border-radius: 6px;
+            border-radius: 5px;
             margin: 15px 0;
             overflow: hidden;
         }
 
-        .gauge-fill {
-            width: 0%;
+        .gauge-bar {
             height: 100%;
+            width: 0%;
             background: var(--safe);
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .badge {
+        .status-tag {
             display: inline-block;
-            padding: 6px 16px;
-            border-radius: 50px;
+            padding: 6px 14px;
+            border-radius: 8px;
             color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-weight: bold;
         }
 
-        .tips {
+        .analysis-text {
             text-align: left;
             font-size: 0.85rem;
-            color: #666;
+            color: #555;
+            line-height: 1.6;
             margin-top: 15px;
-            line-height: 1.5;
         }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>投球動力鏈與負荷分析</h1>
+    <h1>投球步幅與負荷分析儀</h1>
 
     <div class="section">
         <label>投手身高 (cm)</label>
-        <input type="number" id="height" value="180" oninput="syncStride()">
+        <input type="number" id="height" value="180" oninput="updateRange()">
         
-        <label>跨步模式</label>
-        <select id="strideMode">
-            <option value="1.0">高抬腿 (High Leg Kick)</option>
-            <option value="0.95">滑步 (Slide Step)</option>
-            <option value="1.05">慢速跨步 (Slow Windup)</option>
+        <label style="margin-top:15px;">跨步模式</label>
+        <select id="pitchingMode">
+            <option value="tall">高壓式 (Tall-and-Fall)</option>
+            <option value="drive">下沉式 (Dip-and-Drive)</option>
         </select>
     </div>
 
     <div class="section">
-        <label>跨步距離 (cm)</label>
-        <input type="range" id="strideRange" min="100" max="200" value="144" oninput="updateStrideVal(this.value)">
-        <div class="value-display"><span id="strideVal">144</span> cm</div>
+        <label>跨步距離</label>
+        <div class="slider-box">
+            <div class="stride-info">
+                <span id="displayCm">144 cm</span>
+                <span id="displayPct">80% 身高</span>
+            </div>
+            <input type="range" id="strideSlider" oninput="syncLabels(this.value)">
+        </div>
     </div>
 
     <div class="section">
-        <label>手臂啟動時機 (Timing)</label>
+        <label>啟動時機 (Timing)</label>
         <select id="timing">
-            <option value="1.0">正常 (On Time)</option>
-            <option value="1.3">過早 (Early - 身體太快開胸)</option>
-            <option value="1.1">略晚 (Late - 拖重感)</option>
+            <option value="1.0">正常時機 (On Time)</option>
+            <option value="1.25">過早開胸 (Early Rotation)</option>
+            <option value="1.15">手臂滯後 (Arm Drag)</option>
         </select>
     </div>
 
-    <button class="btn" onclick="analyze()">生成分析報告</button>
+    <button class="btn" onclick="runAnalysis()">開始計算</button>
 
-    <div id="resultView">
-        <div style="color: #888; font-size: 0.9rem;">估計肩肘負荷倍數</div>
-        <div id="multDisplay" class="multiplier">1.0x</div>
+    <div id="resultArea">
+        <div style="font-size: 0.8rem; color: #999; font-weight: 600;">肩肘負荷預估值</div>
+        <div id="multText" class="multiplier">1.00x</div>
         
-        <div class="gauge-bar">
-            <div id="gaugeFill" class="gauge-fill"></div>
+        <div class="gauge-bg">
+            <div id="gaugeBar" class="gauge-bar"></div>
         </div>
 
-        <div id="riskBadge" class="badge">計算中...</div>
+        <div id="statusTag" class="status-tag">分析中</div>
         
-        <div class="tips" id="tipContent"></div>
+        <div class="analysis-text" id="analysisText"></div>
     </div>
 </div>
 
 <script>
-    function updateStrideVal(val) {
-        document.getElementById('strideVal').innerText = val;
-    }
-
-    function syncStride() {
+    function updateRange() {
         const h = document.getElementById('height').value;
-        const slider = document.getElementById('strideRange');
-        // 自動調整滑桿範圍至身高 50% ~ 120%
-        slider.min = Math.round(h * 0.5);
-        slider.max = Math.round(h * 1.2);
+        const s = document.getElementById('strideSlider');
+        s.min = Math.round(h * 0.5);
+        s.max = Math.round(h * 1.2);
+        if(s.value > s.max) s.value = s.max;
+        syncLabels(s.value);
     }
 
-    function analyze() {
-        const height = parseFloat(document.getElementById('height').value);
-        const stride = parseFloat(document.getElementById('strideRange').value);
-        const modeModifier = parseFloat(document.getElementById('strideMode').value);
-        const timingModifier = parseFloat(document.getElementById('timing').value);
+    function syncLabels(val) {
+        const h = document.getElementById('height').value;
+        const pct = ((val / h) * 100).toFixed(1);
+        document.getElementById('displayCm').innerText = val + " cm";
+        document.getElementById('displayPct').innerText = pct + "% 身高";
+    }
 
-        const strideRatio = (stride / height) * 100;
+    function runAnalysis() {
+        const h = parseFloat(document.getElementById('height').value);
+        const s = parseFloat(document.getElementById('strideSlider').value);
+        const mode = document.getElementById('pitchingMode').value;
+        const timing = parseFloat(document.getElementById('timing').value);
         
-        // 核心運算：基礎負荷 + 步幅偏差 + Timing偏差 + 模式修正
+        const ratio = (s / h) * 100;
         let baseLoad = 1.0;
         
-        // 步幅比影響 (理想範圍 75-85%)
+        // 模式特有的生物力學邏輯
         let strideImpact = 0;
-        if (strideRatio > 85) {
-            strideImpact = (strideRatio - 85) * 0.04;
-        } else if (strideRatio < 75) {
-            strideImpact = (75 - strideRatio) * 0.02;
+        if (mode === 'tall') {
+            // Tall-and-Fall 理想在 75-85%，超過 88% 負荷劇增
+            if (ratio > 85) strideImpact = (ratio - 85) * 0.05;
+            else if (ratio < 75) strideImpact = (75 - ratio) * 0.02;
+        } else {
+            // Dip-and-Drive 理想在 80-95%，容許較長步幅
+            if (ratio > 95) strideImpact = (ratio - 95) * 0.04;
+            else if (ratio < 80) strideImpact = (80 - ratio) * 0.02;
         }
 
-        // 最終負荷計算
-        let totalMultiplier = (baseLoad + strideImpact) * modeModifier * timingModifier;
+        const finalMult = (baseLoad + strideImpact) * timing;
 
         // UI 更新
-        document.getElementById('resultView').style.display = 'block';
-        document.getElementById('multDisplay').innerText = totalMultiplier.toFixed(2) + 'x';
+        document.getElementById('resultArea').style.display = 'block';
+        document.getElementById('multText').innerText = finalMult.toFixed(2) + "x";
         
-        const fill = document.getElementById('gaugeFill');
-        const badge = document.getElementById('riskBadge');
-        const progress = (totalMultiplier / 2.0) * 100;
-        fill.style.width = Math.min(progress, 100) + '%';
+        const bar = document.getElementById('gaugeBar');
+        const tag = document.getElementById('statusTag');
+        const percent = (finalMult / 2.0) * 100;
+        bar.style.width = Math.min(percent, 100) + "%";
 
-        if (totalMultiplier < 1.25) {
-            fill.style.background = '#27ae60';
-            badge.style.background = '#27ae60';
-            badge.innerText = '安全範圍';
-        } else if (totalMultiplier < 1.55) {
-            fill.style.background = '#f39c12';
-            badge.style.background = '#f39c12';
-            badge.innerText = '中度風險';
+        if (finalMult < 1.2) {
+            bar.style.background = "#34C759";
+            tag.style.background = "#34C759";
+            tag.innerText = "優良區域";
+        } else if (finalMult < 1.5) {
+            bar.style.background = "#FFCC00";
+            tag.style.background = "#FFCC00";
+            tag.innerText = "注意負荷";
         } else {
-            fill.style.background = '#e74c3c';
-            badge.style.background = '#e74c3c';
-            badge.innerText = '高度受傷危險';
+            bar.style.background = "#FF3B30";
+            tag.style.background = "#FF3B30";
+            tag.innerText = "高受傷風險";
         }
 
-        let tipHtml = `
-            <strong>分析摘要：</strong><br>
-            • 當前步幅比：${strideRatio.toFixed(1)}%<br>
-            • Timing 影響：${timingModifier > 1 ? '由於啟動時機不佳，負荷增加了 ' + Math.round((timingModifier-1)*100) + '%' : '時機掌握良好'}<br>
-            • 建議方案：${strideRatio > 85 ? '縮短步幅以穩定重心，避免軀幹過早開胸。' : '可適度增加步幅以提升下肢動力傳導效率。'}
+        document.getElementById('analysisText').innerHTML = `
+            <strong>數據分析：</strong><br>
+            當前步幅為身高的 ${ratio.toFixed(1)}%。<br>
+            ${mode === 'tall' ? 'Tall-and-Fall 模式依賴重力，建議保持穩定的重心轉移。' : 'Dip-and-Drive 模式強調後腳推蹬，請確保前腳著地時支撐強韌。'}<br>
+            ${timing > 1 ? '⚠️ 啟動時機偏差是造成負荷上升的主因，建議加強核心與手臂的協調性。' : '✅ 動作時機良好，能有效傳導力量。'}
         `;
-        document.getElementById('tipContent').innerHTML = tipHtml;
     }
 
-    // 初始同步
-    syncStride();
+    // 初始化
+    updateRange();
 </script>
 
 </body>
