@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>投球運動生物力學分析儀：跨步模式與動作時序對球速與負荷的影響</title>
+    <title>投球生物力學分析儀：負荷與潛力</title>
     <style>
         :root {
             --primary: #1c1c1e;
@@ -83,7 +83,7 @@
 <body>
 
 <div class="card">
-    <h1>投球運動生物力學分析系統</h1>
+    <h1>投球生物力學分析系統</h1>
 
     <div class="section">
         <label>投手身高 (cm)</label>
@@ -207,4 +207,10 @@
             • <b>球速潛力</b>：${potential > 90 ? '動力傳導極佳' : '存在力量流失'} (${potential.toFixed(0)}%)<br>
             • <b>力學特徵</b>：${mode === 'tall' ? '高壓式投法應注意重心下降的穩定性' : '下沉式投法需強大的下肢推蹬支撐'}<br>
             • <b>風險提示</b>：${elbowTorque > 1.4 ? '⚠️ 肘部負荷過重，請檢核開胸時機。' : '✅ 負荷處於安全區間。'}<br>
-            • <b>建議</b>：${ratio < 75 ? '可嘗試增加跨步距離以
+            • <b>建議</b>：${ratio < 75 ? '可嘗試增加跨步距離以提升潛力。' : (ratio > 95 ? '步幅過大可能導致動力鏈斷層，建議稍微縮短。' : '維持目前的動作結構。')}
+        `;
+    }
+    updateRange();
+</script>
+</body>
+</html>
