@@ -3,230 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>投球步幅與肩肘負荷分析儀</title>
+    <title>進階投球步幅與生物力學負荷分析</title>
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --safe-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --safe: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
         }
 
         body {
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--primary-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             justify-content: center;
         }
 
-        .container {
-            max-width: 600px;
+        .card {
+            max-width: 500px;
             width: 100%;
             background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
         h1 {
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+            color: var(--primary);
             margin-bottom: 25px;
-            color: var(--primary-color);
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
         }
 
-        .input-group {
+        .section {
             margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: var(--primary);
         }
 
-        input {
+        select, input[type="number"] {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            box-sizing: border-box;
+            margin-bottom: 10px;
             font-size: 1rem;
         }
 
-        button {
+        /* 滑桿樣式 */
+        .slider-container {
+            padding: 10px 0;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .value-display {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-top: 5px;
+        }
+
+        .btn {
             width: 100%;
             padding: 15px;
-            background-color: var(--primary-color);
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background-color: #34495e;
-        }
-
-        /* 儀表板樣式 */
-        .dashboard {
-            margin-top: 30px;
-            padding: 20px;
-            background: #fcfcfc;
-            border-radius: 12px;
-            border: 1px solid #eee;
-            text-align: center;
-            display: none; /* 初始隱藏 */
-        }
-
-        .gauge-container {
-            width: 100%;
-            height: 20px;
-            background-color: #eee;
             border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-        .gauge-fill {
-            height: 100%;
-            width: 0%;
-            background-color: var(--safe-color);
-            transition: width 0.5s ease-in-out, background-color 0.5s;
+        .btn:hover { background: #1a252f; }
+
+        /* 儀表板 */
+        #resultView {
+            display: none;
+            margin-top: 25px;
+            text-align: center;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
         }
 
-        .multiplier-value {
-            font-size: 2.5rem;
+        .multiplier {
+            font-size: 3rem;
             font-weight: 800;
             margin: 10px 0;
         }
 
-        .risk-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            color: white;
-            font-size: 0.9rem;
-            margin-top: 5px;
+        .gauge-bar {
+            width: 100%;
+            height: 12px;
+            background: #eee;
+            border-radius: 6px;
+            margin: 15px 0;
+            overflow: hidden;
         }
 
-        .data-list {
+        .gauge-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--safe);
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .tips {
             text-align: left;
             font-size: 0.85rem;
-            margin-top: 20px;
             color: #666;
-            line-height: 1.6;
+            margin-top: 15px;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>投球步幅與負荷分析</h1>
-    
-    <div class="input-group">
+<div class="card">
+    <h1>投球動力鏈與負荷分析</h1>
+
+    <div class="section">
         <label>投手身高 (cm)</label>
-        <input type="number" id="height" placeholder="例如: 180" value="180">
-    </div>
-
-    <div class="input-group">
-        <label>跨步長度 (cm)</label>
-        <input type="number" id="stride" placeholder="例如: 150" value="144">
-    </div>
-
-    <button onclick="calculateAnalysis()">開始分析</button>
-
-    <div id="resultDashboard" class="dashboard">
-        <div style="font-size: 0.9rem; color: #888;">估算肩肘負荷倍數</div>
-        <div id="multiplierDisplay" class="multiplier-value">1.0x</div>
+        <input type="number" id="height" value="180" oninput="syncStride()">
         
-        <div class="gauge-container">
+        <label>跨步模式</label>
+        <select id="strideMode">
+            <option value="1.0">高抬腿 (High Leg Kick)</option>
+            <option value="0.95">滑步 (Slide Step)</option>
+            <option value="1.05">慢速跨步 (Slow Windup)</option>
+        </select>
+    </div>
+
+    <div class="section">
+        <label>跨步距離 (cm)</label>
+        <input type="range" id="strideRange" min="100" max="200" value="144" oninput="updateStrideVal(this.value)">
+        <div class="value-display"><span id="strideVal">144</span> cm</div>
+    </div>
+
+    <div class="section">
+        <label>手臂啟動時機 (Timing)</label>
+        <select id="timing">
+            <option value="1.0">正常 (On Time)</option>
+            <option value="1.3">過早 (Early - 身體太快開胸)</option>
+            <option value="1.1">略晚 (Late - 拖重感)</option>
+        </select>
+    </div>
+
+    <button class="btn" onclick="analyze()">生成分析報告</button>
+
+    <div id="resultView">
+        <div style="color: #888; font-size: 0.9rem;">估計肩肘負荷倍數</div>
+        <div id="multDisplay" class="multiplier">1.0x</div>
+        
+        <div class="gauge-bar">
             <div id="gaugeFill" class="gauge-fill"></div>
         </div>
 
-        <div id="riskBadge" class="risk-badge">計算中...</div>
-
-        <div class="data-list" id="detailData">
-            </div>
+        <div id="riskBadge" class="badge">計算中...</div>
+        
+        <div class="tips" id="tipContent"></div>
     </div>
 </div>
 
 <script>
-    function calculateAnalysis() {
-        const height = parseFloat(document.getElementById('height').value);
-        const stride = parseFloat(document.getElementById('stride').value);
-        
-        if (!height || !stride) {
-            alert("請輸入完整數據");
-            return;
-        }
+    function updateStrideVal(val) {
+        document.getElementById('strideVal').innerText = val;
+    }
 
-        // 1. 計算步幅比 (Stride length as % of body height)
+    function syncStride() {
+        const h = document.getElementById('height').value;
+        const slider = document.getElementById('strideRange');
+        // 自動調整滑桿範圍至身高 50% ~ 120%
+        slider.min = Math.round(h * 0.5);
+        slider.max = Math.round(h * 1.2);
+    }
+
+    function analyze() {
+        const height = parseFloat(document.getElementById('height').value);
+        const stride = parseFloat(document.getElementById('strideRange').value);
+        const modeModifier = parseFloat(document.getElementById('strideMode').value);
+        const timingModifier = parseFloat(document.getElementById('timing').value);
+
         const strideRatio = (stride / height) * 100;
         
-        // 2. 核心邏輯：計算負荷倍數 (簡化生物力學模型)
-        // 理想步幅通常在身高的 75%-90% 之間。
-        // 超過 100% 身高或低於 70% 可能導致動力鏈斷裂，增加肩肘代償。
-        let multiplier = 1.0;
-        if (strideRatio > 85) {
-            multiplier += (strideRatio - 85) * 0.05; // 每超過1%，負荷增加0.05倍
-        } else if (strideRatio < 75) {
-            multiplier += (75 - strideRatio) * 0.03; 
-        }
-
-        // 顯示儀表板
-        const dashboard = document.getElementById('resultDashboard');
-        dashboard.style.display = 'block';
-
-        // 更新數據
-        const multiplierDisplay = document.getElementById('multiplierDisplay');
-        const gaugeFill = document.getElementById('gaugeFill');
-        const riskBadge = document.getElementById('riskBadge');
-        const detailData = document.getElementById('detailData');
-
-        multiplierDisplay.innerText = multiplier.toFixed(1) + 'x';
+        // 核心運算：基礎負荷 + 步幅偏差 + Timing偏差 + 模式修正
+        let baseLoad = 1.0;
         
-        // 更新進度條 (以 2.0x 為 100%)
-        const progress = (multiplier / 2.0) * 100;
-        gaugeFill.style.width = Math.min(progress, 100) + '%';
-
-        // 判斷風險等級與顏色
-        if (multiplier < 1.3) {
-            gaugeFill.style.backgroundColor = '#27ae60'; // 綠
-            riskBadge.style.backgroundColor = '#27ae60';
-            riskBadge.innerText = '正常範圍 - 風險低';
-        } else if (multiplier < 1.6) {
-            gaugeFill.style.backgroundColor = '#f39c12'; // 黃
-            riskBadge.style.backgroundColor = '#f39c12';
-            riskBadge.innerText = '負荷偏高 - 請注意疲勞';
-        } else {
-            gaugeFill.style.backgroundColor = '#e74c3c'; // 紅
-            riskBadge.style.backgroundColor = '#e74c3c';
-            riskBadge.innerText = '高受傷風險 - 建議優化步幅';
+        // 步幅比影響 (理想範圍 75-85%)
+        let strideImpact = 0;
+        if (strideRatio > 85) {
+            strideImpact = (strideRatio - 85) * 0.04;
+        } else if (strideRatio < 75) {
+            strideImpact = (75 - strideRatio) * 0.02;
         }
 
-        // 顯示詳細內容
-        detailData.innerHTML = `
-            • 步幅比：${strideRatio.toFixed(1)}% 身高<br>
-            • 建議範圍：75% - 85% 身高 (${(height*0.75).toFixed(0)}cm - ${(height*0.85).toFixed(0)}cm)<br>
-            • 生物力學提示：${getHint(strideRatio)}
+        // 最終負荷計算
+        let totalMultiplier = (baseLoad + strideImpact) * modeModifier * timingModifier;
+
+        // UI 更新
+        document.getElementById('resultView').style.display = 'block';
+        document.getElementById('multDisplay').innerText = totalMultiplier.toFixed(2) + 'x';
+        
+        const fill = document.getElementById('gaugeFill');
+        const badge = document.getElementById('riskBadge');
+        const progress = (totalMultiplier / 2.0) * 100;
+        fill.style.width = Math.min(progress, 100) + '%';
+
+        if (totalMultiplier < 1.25) {
+            fill.style.background = '#27ae60';
+            badge.style.background = '#27ae60';
+            badge.innerText = '安全範圍';
+        } else if (totalMultiplier < 1.55) {
+            fill.style.background = '#f39c12';
+            badge.style.background = '#f39c12';
+            badge.innerText = '中度風險';
+        } else {
+            fill.style.background = '#e74c3c';
+            badge.style.background = '#e74c3c';
+            badge.innerText = '高度受傷危險';
+        }
+
+        let tipHtml = `
+            <strong>分析摘要：</strong><br>
+            • 當前步幅比：${strideRatio.toFixed(1)}%<br>
+            • Timing 影響：${timingModifier > 1 ? '由於啟動時機不佳，負荷增加了 ' + Math.round((timingModifier-1)*100) + '%' : '時機掌握良好'}<br>
+            • 建議方案：${strideRatio > 85 ? '縮短步幅以穩定重心，避免軀幹過早開胸。' : '可適度增加步幅以提升下肢動力傳導效率。'}
         `;
+        document.getElementById('tipContent').innerHTML = tipHtml;
     }
 
-    function getHint(ratio) {
-        if (ratio > 90) return "步幅過大，可能導致軀幹過早旋轉，增加肩部內旋負荷。";
-        if (ratio < 70) return "步幅過小，動力傳導不足，可能導致过度依賴手臂發力。";
-        return "步幅適中，有利於動力鏈從下肢傳導至上肢。";
-    }
+    // 初始同步
+    syncStride();
 </script>
 
 </body>
