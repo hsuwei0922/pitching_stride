@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>棒球投球生物力學分析儀</title>
+    <title>投球生物力學：負荷與速度潛力分析</title>
     <style>
         :root {
             --primary: #1a1a1a;
             --accent: #007AFF;
+            --velo: #5856D6;
             --safe: #34C759;
             --warning: #FFCC00;
             --danger: #FF3B30;
@@ -15,159 +16,148 @@
 
         body {
             font-family: -apple-system, system-ui, sans-serif;
-            background-color: #f5f5f7;
+            background-color: #f2f2f7;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             justify-content: center;
         }
 
         .card {
-            max-width: 450px;
+            max-width: 480px;
             width: 100%;
             background: white;
             padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 28px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
         }
 
         h1 {
             text-align: center;
-            font-size: 1.3rem;
-            color: var(--primary);
+            font-size: 1.25rem;
             margin-bottom: 20px;
+            color: var(--primary);
         }
 
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding: 15px;
-            background: #f9f9fb;
-            border-radius: 16px;
+            background: #f8f8fa;
+            border-radius: 18px;
         }
 
         label {
             display: block;
             font-weight: 600;
             margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
         }
 
         select, input[type="number"] {
             width: 100%;
             padding: 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
             font-size: 1rem;
             box-sizing: border-box;
+            outline: none;
         }
 
-        .slider-box {
-            text-align: center;
-            padding: 10px 0;
-        }
+        .slider-box { text-align: center; }
 
         input[type="range"] {
             width: 100%;
             margin: 15px 0;
             -webkit-appearance: none;
-            background: #e0e0e0;
-            height: 6px;
-            border-radius: 3px;
+            background: #ddd;
+            height: 4px;
+            border-radius: 2px;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            background: var(--accent);
+            width: 22px;
+            height: 22px;
+            background: var(--primary);
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .stride-info {
             display: flex;
             justify-content: space-between;
-            font-weight: bold;
-            color: var(--accent);
-            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
         }
 
         .btn {
             width: 100%;
-            padding: 16px;
+            padding: 18px;
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 16px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
+            margin-top: 10px;
         }
 
-        .btn:active { transform: scale(0.98); }
-
+        /* 結果顯示區 */
         #resultArea {
             display: none;
             margin-top: 25px;
             padding-top: 20px;
             border-top: 1px solid #eee;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid #f0f0f0;
             text-align: center;
         }
 
-        .multiplier {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin: 5px 0;
-            letter-spacing: -2px;
-        }
+        .stat-label { font-size: 0.75rem; color: #999; font-weight: 600; margin-bottom: 5px; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
+        
+        .potential-value { color: var(--velo); }
 
-        .gauge-bg {
-            width: 100%;
-            height: 10px;
-            background: #eee;
-            border-radius: 5px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
+        .bar-bg { width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: 0.8s ease; }
 
-        .gauge-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--safe);
-            transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .status-tag {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 8px;
-            color: white;
+        .analysis-box {
+            background: #f1f7ff;
+            padding: 15px;
+            border-radius: 14px;
             font-size: 0.85rem;
-            font-weight: bold;
-        }
-
-        .analysis-text {
-            text-align: left;
-            font-size: 0.85rem;
-            color: #555;
-            line-height: 1.6;
-            margin-top: 15px;
+            line-height: 1.5;
+            color: #334;
         }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>投球步幅與負荷分析儀</h1>
+    <h1>Pitching Bio-Analysis</h1>
 
     <div class="section">
         <label>投手身高 (cm)</label>
         <input type="number" id="height" value="180" oninput="updateRange()">
         
-        <label style="margin-top:15px;">跨步模式</label>
+        <label style="margin-top:15px;">投球模式</label>
         <select id="pitchingMode">
             <option value="tall">高壓式 (Tall-and-Fall)</option>
             <option value="drive">下沉式 (Dip-and-Drive)</option>
@@ -179,34 +169,38 @@
         <div class="slider-box">
             <div class="stride-info">
                 <span id="displayCm">144 cm</span>
-                <span id="displayPct">80% 身高</span>
+                <span id="displayPct" style="color:var(--accent)">80.0%</span>
             </div>
             <input type="range" id="strideSlider" oninput="syncLabels(this.value)">
         </div>
     </div>
 
     <div class="section">
-        <label>啟動時機 (Timing)</label>
+        <label>時機控制 (Timing)</label>
         <select id="timing">
-            <option value="1.0">正常時機 (On Time)</option>
-            <option value="1.25">過早開胸 (Early Rotation)</option>
-            <option value="1.15">手臂滯後 (Arm Drag)</option>
+            <option value="1.0">完美 (On Time)</option>
+            <option value="1.2">過早開胸 (Early Rotation)</option>
+            <option value="1.1">動力滯後 (Arm Drag)</option>
         </select>
     </div>
 
-    <button class="btn" onclick="runAnalysis()">開始計算</button>
+    <button class="btn" onclick="runAnalysis()">產生分析報告</button>
 
     <div id="resultArea">
-        <div style="font-size: 0.8rem; color: #999; font-weight: 600;">肩肘負荷預估值</div>
-        <div id="multText" class="multiplier">1.00x</div>
-        
-        <div class="gauge-bg">
-            <div id="gaugeBar" class="gauge-bar"></div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">肩肘負荷預估</div>
+                <div id="multText" class="stat-value">1.00x</div>
+                <div class="bar-bg"><div id="loadBar" class="bar-fill"></div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">球速潛力發揮</div>
+                <div id="veloText" class="stat-value potential-value">0%</div>
+                <div class="bar-bg"><div id="veloBar" class="bar-fill" style="background:var(--velo)"></div></div>
+            </div>
         </div>
-
-        <div id="statusTag" class="status-tag">分析中</div>
         
-        <div class="analysis-text" id="analysisText"></div>
+        <div class="analysis-box" id="analysisText"></div>
     </div>
 </div>
 
@@ -216,7 +210,6 @@
         const s = document.getElementById('strideSlider');
         s.min = Math.round(h * 0.5);
         s.max = Math.round(h * 1.2);
-        if(s.value > s.max) s.value = s.max;
         syncLabels(s.value);
     }
 
@@ -224,7 +217,7 @@
         const h = document.getElementById('height').value;
         const pct = ((val / h) * 100).toFixed(1);
         document.getElementById('displayCm').innerText = val + " cm";
-        document.getElementById('displayPct').innerText = pct + "% 身高";
+        document.getElementById('displayPct').innerText = pct + "%";
     }
 
     function runAnalysis() {
@@ -234,54 +227,54 @@
         const timing = parseFloat(document.getElementById('timing').value);
         
         const ratio = (s / h) * 100;
-        let baseLoad = 1.0;
         
-        // 模式特有的生物力學邏輯
-        let strideImpact = 0;
+        // 1. 負荷計算邏輯
+        let loadMult = 1.0;
         if (mode === 'tall') {
-            // Tall-and-Fall 理想在 75-85%，超過 88% 負荷劇增
-            if (ratio > 85) strideImpact = (ratio - 85) * 0.05;
-            else if (ratio < 75) strideImpact = (75 - ratio) * 0.02;
+            if (ratio > 85) loadMult += (ratio - 85) * 0.05;
+            else if (ratio < 75) loadMult += (75 - ratio) * 0.02;
         } else {
-            // Dip-and-Drive 理想在 80-95%，容許較長步幅
-            if (ratio > 95) strideImpact = (ratio - 95) * 0.04;
-            else if (ratio < 80) strideImpact = (80 - ratio) * 0.02;
+            if (ratio > 95) loadMult += (ratio - 95) * 0.04;
+            else if (ratio < 80) loadMult += (80 - ratio) * 0.02;
         }
+        loadMult *= timing;
 
-        const finalMult = (baseLoad + strideImpact) * timing;
+        // 2. 球速潛力計算邏輯 (理想步幅 + 完美 Timing = 100%)
+        let potential = 100;
+        let diff = 0;
+        if (mode === 'tall') {
+            diff = Math.abs(ratio - 80); // Tall-and-fall 理想 80%
+        } else {
+            diff = Math.abs(ratio - 88); // Dip-and-drive 理想 88%
+        }
+        potential -= (diff * 1.5); // 步幅每偏離理想值 1%，潛力下降 1.5%
+        
+        if (timing === 1.2) potential -= 20; // 開胸過早，力量流失 20%
+        if (timing === 1.1) potential -= 10; // 手臂滯後，力量流失 10%
+        
+        potential = Math.max(potential, 40); // 最低保底 40%
 
         // UI 更新
         document.getElementById('resultArea').style.display = 'block';
-        document.getElementById('multText').innerText = finalMult.toFixed(2) + "x";
+        document.getElementById('multText').innerText = loadMult.toFixed(2) + "x";
+        document.getElementById('veloText').innerText = Math.round(potential) + "%";
         
-        const bar = document.getElementById('gaugeBar');
-        const tag = document.getElementById('statusTag');
-        const percent = (finalMult / 2.0) * 100;
-        bar.style.width = Math.min(percent, 100) + "%";
-
-        if (finalMult < 1.2) {
-            bar.style.background = "#34C759";
-            tag.style.background = "#34C759";
-            tag.innerText = "優良區域";
-        } else if (finalMult < 1.5) {
-            bar.style.background = "#FFCC00";
-            tag.style.background = "#FFCC00";
-            tag.innerText = "注意負荷";
-        } else {
-            bar.style.background = "#FF3B30";
-            tag.style.background = "#FF3B30";
-            tag.innerText = "高受傷風險";
-        }
+        const loadBar = document.getElementById('loadBar');
+        const veloBar = document.getElementById('veloBar');
+        
+        loadBar.style.width = Math.min((loadMult / 2) * 100, 100) + "%";
+        loadBar.style.background = loadMult < 1.3 ? "#34C759" : (loadMult < 1.6 ? "#FFCC00" : "#FF3B30");
+        
+        veloBar.style.width = potential + "%";
 
         document.getElementById('analysisText').innerHTML = `
-            <strong>數據分析：</strong><br>
-            當前步幅為身高的 ${ratio.toFixed(1)}%。<br>
-            ${mode === 'tall' ? 'Tall-and-Fall 模式依賴重力，建議保持穩定的重心轉移。' : 'Dip-and-Drive 模式強調後腳推蹬，請確保前腳著地時支撐強韌。'}<br>
-            ${timing > 1 ? '⚠️ 啟動時機偏差是造成負荷上升的主因，建議加強核心與手臂的協調性。' : '✅ 動作時機良好，能有效傳導力量。'}
+            <strong>教練點評：</strong><br>
+            您的步幅比為 ${ratio.toFixed(1)}%。<br>
+            ${potential > 90 ? '✅ 動力鏈銜接優異，能有效將下肢力量轉換為球速。' : '⚠️ 能量傳導存在流失，建議優化跨步距離。'}<br>
+            ${loadMult > 1.5 ? '🔴 警告：目前動作對肩肘壓力過大，建議調整 Timing 以降低負擔。' : '🟢 目前身體負荷處於安全區間。'}
         `;
     }
 
-    // 初始化
     updateRange();
 </script>
 
